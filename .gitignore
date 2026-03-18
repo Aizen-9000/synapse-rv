@@ -28,3 +28,4 @@ rtl/security/sha3/
 # Python
 __pycache__/
 *.pyc
+sw/build/
