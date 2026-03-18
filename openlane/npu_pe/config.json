@@ -1,0 +1,23 @@
+{
+  "DESIGN_NAME": "npu_pe",
+  "VERILOG_FILES": [
+    "/home/anupam/synapse-rv-linux/rtl/npu/npu_pe.v"
+  ],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 10.0,
+  "PDK": "sky130A",
+  "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
+  "DESIGN_IS_CORE": false,
+  "FP_SIZING": "relative",
+  "FP_CORE_UTIL": 40,
+  "PL_TARGET_DENSITY": 0.45,
+  "SYNTH_STRATEGY": "DELAY 1",
+  "SYNTH_MAX_FANOUT": 8,
+  "RUN_FILL_INSERTION": true,
+  "RUN_CVC": true,
+  "MAGIC_DRC_USE_GDS": true,
+  "RUN_KLAYOUT_DRC": true,
+  "RUN_KLAYOUT_XOR": true,
+  "DIODE_INSERTION_STRATEGY": 4,
+  "RUN_LINTER": false
+}

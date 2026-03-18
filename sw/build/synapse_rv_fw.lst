@@ -1,0 +1,645 @@
+
+build/synapse_rv_fw.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+00000000ffff0000 <_start>:
+    ffff0000:	30401073          	csrw	mie,zero
+    ffff0004:	34401073          	csrw	mip,zero
+    ffff0008:	00008137          	lui	sp,0x8
+    ffff000c:	ff810113          	addi	sp,sp,-8 # 7ff8 <_heap_start+0xae8>
+    ffff0010:	00000293          	li	t0,0
+    ffff0014:	00005337          	lui	t1,0x5
+    ffff0018:	50030313          	addi	t1,t1,1280 # 5500 <npu_done_flag>
+
+00000000ffff001c <zero_bss>:
+    ffff001c:	00628863          	beq	t0,t1,ffff002c <bss_done>
+    ffff0020:	0002b023          	sd	zero,0(t0)
+    ffff0024:	00828293          	addi	t0,t0,8
+    ffff0028:	ff5ff06f          	j	ffff001c <zero_bss>
+
+00000000ffff002c <bss_done>:
+    ffff002c:	00000297          	auipc	t0,0x0
+    ffff0030:	69428293          	addi	t0,t0,1684 # ffff06c0 <__data_load>
+    ffff0034:	00000313          	li	t1,0
+    ffff0038:	00000393          	li	t2,0
+
+00000000ffff003c <copy_data>:
+    ffff003c:	00730c63          	beq	t1,t2,ffff0054 <copy_done>
+    ffff0040:	0002be03          	ld	t3,0(t0)
+    ffff0044:	01c33023          	sd	t3,0(t1)
+    ffff0048:	00828293          	addi	t0,t0,8
+    ffff004c:	00830313          	addi	t1,t1,8
+    ffff0050:	fedff06f          	j	ffff003c <copy_data>
+
+00000000ffff0054 <copy_done>:
+    ffff0054:	00000297          	auipc	t0,0x0
+    ffff0058:	01c28293          	addi	t0,t0,28 # ffff0070 <trap_handler>
+    ffff005c:	30529073          	csrw	mtvec,t0
+    ffff0060:	5a2000ef          	jal	ffff0602 <main>
+
+00000000ffff0064 <halt>:
+    ffff0064:	10500073          	wfi
+    ffff0068:	ffdff06f          	j	ffff0064 <halt>
+    ffff006c:	00000013          	nop
+
+00000000ffff0070 <trap_handler>:
+    ffff0070:	342022f3          	csrr	t0,mcause
+    ffff0074:	0002c463          	bltz	t0,ffff007c <trap_return>
+    ffff0078:	fedff06f          	j	ffff0064 <halt>
+
+00000000ffff007c <trap_return>:
+    ffff007c:	30200073          	mret
+	...
+
+00000000ffff0088 <npu_reset>:
+    ffff0088:	478d                	li	a5,3
+    ffff008a:	07fa                	slli	a5,a5,0x1e
+    ffff008c:	4709                	li	a4,2
+    ffff008e:	c398                	sw	a4,0(a5)
+    ffff0090:	1141                	addi	sp,sp,-16
+    ffff0092:	c602                	sw	zero,12(sp)
+    ffff0094:	4732                	lw	a4,12(sp)
+    ffff0096:	06300793          	li	a5,99
+    ffff009a:	00e7ca63          	blt	a5,a4,ffff00ae <npu_reset+0x26>
+    ffff009e:	06300713          	li	a4,99
+    ffff00a2:	47b2                	lw	a5,12(sp)
+    ffff00a4:	2785                	addiw	a5,a5,1
+    ffff00a6:	c63e                	sw	a5,12(sp)
+    ffff00a8:	47b2                	lw	a5,12(sp)
+    ffff00aa:	fef75ce3          	bge	a4,a5,ffff00a2 <npu_reset+0x1a>
+    ffff00ae:	478d                	li	a5,3
+    ffff00b0:	07fa                	slli	a5,a5,0x1e
+    ffff00b2:	0007a023          	sw	zero,0(a5)
+    ffff00b6:	0141                	addi	sp,sp,16
+    ffff00b8:	8082                	ret
+
+00000000ffff00ba <npu_load_weights>:
+    ffff00ba:	000407b7          	lui	a5,0x40
+    ffff00be:	02b7ed63          	bltu	a5,a1,ffff00f8 <npu_load_weights+0x3e>
+    ffff00c2:	460d                	li	a2,3
+    ffff00c4:	067a                	slli	a2,a2,0x1e
+    ffff00c6:	259d                	addiw	a1,a1,7
+    ffff00c8:	86b2                	mv	a3,a2
+    ffff00ca:	0035d59b          	srliw	a1,a1,0x3
+    ffff00ce:	4781                	li	a5,0
+    ffff00d0:	02060613          	addi	a2,a2,32
+    ffff00d4:	02468693          	addi	a3,a3,36
+    ffff00d8:	cd91                	beqz	a1,ffff00f4 <npu_load_weights+0x3a>
+    ffff00da:	6118                	ld	a4,0(a0)
+    ffff00dc:	c21c                	sw	a5,0(a2)
+    ffff00de:	0521                	addi	a0,a0,8
+    ffff00e0:	0007081b          	sext.w	a6,a4
+    ffff00e4:	0106a023          	sw	a6,0(a3)
+    ffff00e8:	c21c                	sw	a5,0(a2)
+    ffff00ea:	9701                	srai	a4,a4,0x20
+    ffff00ec:	c298                	sw	a4,0(a3)
+    ffff00ee:	2785                	addiw	a5,a5,1 # 40001 <_heap_start+0x38af1>
+    ffff00f0:	fef595e3          	bne	a1,a5,ffff00da <npu_load_weights+0x20>
+    ffff00f4:	4501                	li	a0,0
+    ffff00f6:	8082                	ret
+    ffff00f8:	557d                	li	a0,-1
+    ffff00fa:	8082                	ret
+
+00000000ffff00fc <npu_configure_activation>:
+    ffff00fc:	0085959b          	slliw	a1,a1,0x8
+    ffff0100:	890d                	andi	a0,a0,3
+    ffff0102:	478d                	li	a5,3
+    ffff0104:	8dc9                	or	a1,a1,a0
+    ffff0106:	07fa                	slli	a5,a5,0x1e
+    ffff0108:	2581                	sext.w	a1,a1
+    ffff010a:	c78c                	sw	a1,8(a5)
+    ffff010c:	8082                	ret
+
+00000000ffff010e <npu_run_inference>:
+    ffff010e:	478d                	li	a5,3
+    ffff0110:	07fa                	slli	a5,a5,0x1e
+    ffff0112:	873e                	mv	a4,a5
+    ffff0114:	c3c8                	sw	a0,4(a5)
+    ffff0116:	4785                	li	a5,1
+    ffff0118:	c31c                	sw	a5,0(a4)
+    ffff011a:	8082                	ret
+
+00000000ffff011c <npu_wait_done>:
+    ffff011c:	468d                	li	a3,3
+    ffff011e:	06fa                	slli	a3,a3,0x1e
+    ffff0120:	8636                	mv	a2,a3
+    ffff0122:	4701                	li	a4,0
+    ffff0124:	06b1                	addi	a3,a3,12
+    ffff0126:	a019                	j	ffff012c <npu_wait_done+0x10>
+    ffff0128:	00e56a63          	bltu	a0,a4,ffff013c <npu_wait_done+0x20>
+    ffff012c:	429c                	lw	a5,0(a3)
+    ffff012e:	2705                	addiw	a4,a4,1
+    ffff0130:	8b89                	andi	a5,a5,2
+    ffff0132:	dbfd                	beqz	a5,ffff0128 <npu_wait_done+0xc>
+    ffff0134:	00062023          	sw	zero,0(a2)
+    ffff0138:	4501                	li	a0,0
+    ffff013a:	8082                	ret
+    ffff013c:	557d                	li	a0,-1
+    ffff013e:	8082                	ret
+
+00000000ffff0140 <npu_is_busy>:
+    ffff0140:	478d                	li	a5,3
+    ffff0142:	07fa                	slli	a5,a5,0x1e
+    ffff0144:	47c8                	lw	a0,12(a5)
+    ffff0146:	8905                	andi	a0,a0,1
+    ffff0148:	8082                	ret
+
+00000000ffff014a <npu_tiles_completed>:
+    ffff014a:	478d                	li	a5,3
+    ffff014c:	07fa                	slli	a5,a5,0x1e
+    ffff014e:	47c8                	lw	a0,12(a5)
+    ffff0150:	0025551b          	srliw	a0,a0,0x2
+    ffff0154:	1542                	slli	a0,a0,0x30
+    ffff0156:	9141                	srli	a0,a0,0x30
+    ffff0158:	8082                	ret
+
+00000000ffff015a <npu_read_output>:
+    ffff015a:	c585                	beqz	a1,ffff0182 <npu_read_output+0x28>
+    ffff015c:	468d                	li	a3,3
+    ffff015e:	02059793          	slli	a5,a1,0x20
+    ffff0162:	06fa                	slli	a3,a3,0x1e
+    ffff0164:	01e7d593          	srli	a1,a5,0x1e
+    ffff0168:	04068693          	addi	a3,a3,64
+    ffff016c:	87aa                	mv	a5,a0
+    ffff016e:	8e9d                	sub	a3,a3,a5
+    ffff0170:	952e                	add	a0,a0,a1
+    ffff0172:	00f68733          	add	a4,a3,a5
+    ffff0176:	4318                	lw	a4,0(a4)
+    ffff0178:	0791                	addi	a5,a5,4
+    ffff017a:	fee7ae23          	sw	a4,-4(a5)
+    ffff017e:	fea79ae3          	bne	a5,a0,ffff0172 <npu_read_output+0x18>
+    ffff0182:	8082                	ret
+
+00000000ffff0184 <npu_irq_handler>:
+    ffff0184:	478d                	li	a5,3
+    ffff0186:	07fa                	slli	a5,a5,0x1e
+    ffff0188:	47d8                	lw	a4,12(a5)
+    ffff018a:	468d                	li	a3,3
+    ffff018c:	06fa                	slli	a3,a3,0x1e
+    ffff018e:	00277793          	andi	a5,a4,2
+    ffff0192:	cb81                	beqz	a5,ffff01a2 <npu_irq_handler+0x1e>
+    ffff0194:	4785                	li	a5,1
+    ffff0196:	00005737          	lui	a4,0x5
+    ffff019a:	50f70023          	sb	a5,1280(a4) # 5500 <npu_done_flag>
+    ffff019e:	0006a023          	sw	zero,0(a3)
+    ffff01a2:	8082                	ret
+
+00000000ffff01a4 <npu_wait_done_irq>:
+    ffff01a4:	000057b7          	lui	a5,0x5
+    ffff01a8:	50078023          	sb	zero,1280(a5) # 5500 <npu_done_flag>
+    ffff01ac:	4781                	li	a5,0
+    ffff01ae:	000056b7          	lui	a3,0x5
+    ffff01b2:	50068693          	addi	a3,a3,1280 # 5500 <npu_done_flag>
+    ffff01b6:	a031                	j	ffff01c2 <npu_wait_done_irq+0x1e>
+    ffff01b8:	10500073          	wfi
+    ffff01bc:	2785                	addiw	a5,a5,1
+    ffff01be:	00f56763          	bltu	a0,a5,ffff01cc <npu_wait_done_irq+0x28>
+    ffff01c2:	0006c703          	lbu	a4,0(a3)
+    ffff01c6:	db6d                	beqz	a4,ffff01b8 <npu_wait_done_irq+0x14>
+    ffff01c8:	4501                	li	a0,0
+    ffff01ca:	8082                	ret
+    ffff01cc:	557d                	li	a0,-1
+    ffff01ce:	8082                	ret
+
+00000000ffff01d0 <synapse_matmul>:
+    ffff01d0:	00c767b3          	or	a5,a4,a2
+    ffff01d4:	8b9d                	andi	a5,a5,7
+    ffff01d6:	eba9                	bnez	a5,ffff0228 <synapse_matmul+0x58>
+    ffff01d8:	02b607bb          	mulw	a5,a2,a1
+    ffff01dc:	1101                	addi	sp,sp,-32
+    ffff01de:	e822                	sd	s0,16(sp)
+    ffff01e0:	8536                	mv	a0,a3
+    ffff01e2:	e426                	sd	s1,8(sp)
+    ffff01e4:	e04a                	sd	s2,0(sp)
+    ffff01e6:	ec06                	sd	ra,24(sp)
+    ffff01e8:	84c2                	mv	s1,a6
+    ffff01ea:	8946                	mv	s2,a7
+    ffff01ec:	02c705bb          	mulw	a1,a4,a2
+    ffff01f0:	0067d79b          	srliw	a5,a5,0x6
+    ffff01f4:	03079413          	slli	s0,a5,0x30
+    ffff01f8:	9041                	srli	s0,s0,0x30
+    ffff01fa:	ec1ff0ef          	jal	ffff00ba <npu_load_weights>
+    ffff01fe:	e51d                	bnez	a0,ffff022c <synapse_matmul+0x5c>
+    ffff0200:	85ca                	mv	a1,s2
+    ffff0202:	8526                	mv	a0,s1
+    ffff0204:	ef9ff0ef          	jal	ffff00fc <npu_configure_activation>
+    ffff0208:	8522                	mv	a0,s0
+    ffff020a:	f05ff0ef          	jal	ffff010e <npu_run_inference>
+    ffff020e:	00989537          	lui	a0,0x989
+    ffff0212:	68050513          	addi	a0,a0,1664 # 989680 <_heap_end+0x909880>
+    ffff0216:	f07ff0ef          	jal	ffff011c <npu_wait_done>
+    ffff021a:	e919                	bnez	a0,ffff0230 <synapse_matmul+0x60>
+    ffff021c:	60e2                	ld	ra,24(sp)
+    ffff021e:	6442                	ld	s0,16(sp)
+    ffff0220:	64a2                	ld	s1,8(sp)
+    ffff0222:	6902                	ld	s2,0(sp)
+    ffff0224:	6105                	addi	sp,sp,32
+    ffff0226:	8082                	ret
+    ffff0228:	557d                	li	a0,-1
+    ffff022a:	8082                	ret
+    ffff022c:	5579                	li	a0,-2
+    ffff022e:	b7fd                	j	ffff021c <synapse_matmul+0x4c>
+    ffff0230:	5575                	li	a0,-3
+    ffff0232:	b7ed                	j	ffff021c <synapse_matmul+0x4c>
+
+00000000ffff0234 <synapse_conv2d>:
+    ffff0234:	716d                	addi	sp,sp,-272
+    ffff0236:	12012f03          	lw	t5,288(sp)
+    ffff023a:	82b2                	mv	t0,a2
+    ffff023c:	f9ca                	sd	s2,240(sp)
+    ffff023e:	e9da                	sd	s6,208(sp)
+    ffff0240:	8946                	mv	s2,a7
+    ffff0242:	11812b03          	lw	s6,280(sp)
+    ffff0246:	001f161b          	slliw	a2,t5,0x1
+    ffff024a:	41058e3b          	subw	t3,a1,a6
+    ffff024e:	4122833b          	subw	t1,t0,s2
+    ffff0252:	00c3033b          	addw	t1,t1,a2
+    ffff0256:	00ce0e3b          	addw	t3,t3,a2
+    ffff025a:	fd66                	sd	s9,184(sp)
+    ffff025c:	f96a                	sd	s10,176(sp)
+    ffff025e:	03635cbb          	divuw	s9,t1,s6
+    ffff0262:	fda6                	sd	s1,248(sp)
+    ffff0264:	84be                	mv	s1,a5
+    ffff0266:	e5de                	sd	s7,200(sp)
+    ffff0268:	e1e2                	sd	s8,192(sp)
+    ffff026a:	8bc2                	mv	s7,a6
+    ffff026c:	edd6                	sd	s5,216(sp)
+    ffff026e:	83aa                	mv	t2,a0
+    ffff0270:	e606                	sd	ra,264(sp)
+    ffff0272:	6e85                	lui	t4,0x1
+    ffff0274:	88ae                	mv	a7,a1
+    ffff0276:	12814803          	lbu	a6,296(sp)
+    ffff027a:	13014603          	lbu	a2,304(sp)
+    ffff027e:	8fb6                	mv	t6,a3
+    ffff0280:	85ba                	mv	a1,a4
+    ffff0282:	036e5d3b          	divuw	s10,t3,s6
+    ffff0286:	001c8c1b          	addiw	s8,s9,1
+    ffff028a:	02d907bb          	mulw	a5,s2,a3
+    ffff028e:	001d031b          	addiw	t1,s10,1
+    ffff0292:	037787bb          	mulw	a5,a5,s7
+    ffff0296:	03830abb          	mulw	s5,t1,s8
+    ffff029a:	0007851b          	sext.w	a0,a5
+    ffff029e:	035787bb          	mulw	a5,a5,s5
+    ffff02a2:	1efeed63          	bltu	t4,a5,ffff049c <synapse_conv2d+0x268>
+    ffff02a6:	1c030c63          	beqz	t1,ffff047e <synapse_conv2d+0x24a>
+    ffff02aa:	025f06bb          	mulw	a3,t5,t0
+    ffff02ae:	0002809b          	sext.w	ra,t0
+    ffff02b2:	f1d2                	sd	s4,224(sp)
+    ffff02b4:	41eb8a3b          	subw	s4,s7,t5
+    ffff02b8:	e222                	sd	s0,256(sp)
+    ffff02ba:	f5ce                	sd	s3,232(sp)
+    ffff02bc:	f56e                	sd	s11,168(sp)
+    ffff02be:	8456                	mv	s0,s5
+    ffff02c0:	fc56                	sd	s5,56(sp)
+    ffff02c2:	e0ae                	sd	a1,64(sp)
+    ffff02c4:	03f282bb          	mulw	t0,t0,t6
+    ffff02c8:	40d006bb          	negw	a3,a3
+    ffff02cc:	41e686bb          	subw	a3,a3,t5
+    ffff02d0:	8ac2                	mv	s5,a6
+    ffff02d2:	89b2                	mv	s3,a2
+    ffff02d4:	4781                	li	a5,0
+    ffff02d6:	4701                	li	a4,0
+    ffff02d8:	4e81                	li	t4,0
+    ffff02da:	41e90dbb          	subw	s11,s2,t5
+    ffff02de:	2881                	sext.w	a7,a7
+    ffff02e0:	03628e3b          	mulw	t3,t0,s6
+    ffff02e4:	00004337          	lui	t1,0x4
+    ffff02e8:	40030313          	addi	t1,t1,1024 # 4400 <im2col_buf.2>
+    ffff02ec:	f82a                	sd	a0,48(sp)
+    ffff02ee:	85e2                	mv	a1,s8
+    ffff02f0:	e4a6                	sd	s1,72(sp)
+    ffff02f2:	865e                	mv	a2,s7
+    ffff02f4:	8852                	mv	a6,s4
+    ffff02f6:	f072                	sd	t3,32(sp)
+    ffff02f8:	03f686bb          	mulw	a3,a3,t6
+    ffff02fc:	03fb0e3b          	mulw	t3,s6,t6
+    ffff0300:	c9f5                	beqz	a1,ffff03f4 <synapse_conv2d+0x1c0>
+    ffff0302:	41e78a3b          	subw	s4,a5,t5
+    ffff0306:	8536                	mv	a0,a3
+    ffff0308:	f452                	sd	s4,40(sp)
+    ffff030a:	e8ea                	sd	s10,80(sp)
+    ffff030c:	f0ba                	sd	a4,96(sp)
+    ffff030e:	f4b6                	sd	a3,104(sp)
+    ffff0310:	8bee                	mv	s7,s11
+    ffff0312:	4481                	li	s1,0
+    ffff0314:	00f80a3b          	addw	s4,a6,a5
+    ffff0318:	ecae                	sd	a1,88(sp)
+    ffff031a:	8d3e                	mv	s10,a5
+    ffff031c:	86fa                	mv	a3,t5
+    ffff031e:	8756                	mv	a4,s5
+    ffff0320:	daa2                	sw	s0,116(sp)
+    ffff0322:	c65d                	beqz	a2,ffff03d0 <synapse_conv2d+0x19c>
+    ffff0324:	7c22                	ld	s8,40(sp)
+    ffff0326:	85aa                	mv	a1,a0
+    ffff0328:	e52a                	sd	a0,136(sp)
+    ffff032a:	412b8abb          	subw	s5,s7,s2
+    ffff032e:	fce6                	sd	s9,120(sp)
+    ffff0330:	ec16                	sd	t0,24(sp)
+    ffff0332:	e126                	sd	s1,128(sp)
+    ffff0334:	e972                	sd	t3,144(sp)
+    ffff0336:	ed5a                	sd	s6,152(sp)
+    ffff0338:	853a                	mv	a0,a4
+    ffff033a:	8e56                	mv	t3,s5
+    ffff033c:	8b2e                	mv	s6,a1
+    ffff033e:	000c041b          	sext.w	s0,s8
+    ffff0342:	06090b63          	beqz	s2,ffff03b8 <synapse_conv2d+0x184>
+    ffff0346:	e82e                	sd	a1,16(sp)
+    ffff0348:	8f6a                	mv	t5,s10
+    ffff034a:	85b2                	mv	a1,a2
+    ffff034c:	84ca                	mv	s1,s2
+    ffff034e:	040f8c63          	beqz	t6,ffff03a6 <synapse_conv2d+0x172>
+    ffff0352:	018e6cb3          	or	s9,t3,s8
+    ffff0356:	000e0d1b          	sext.w	s10,t3
+    ffff035a:	01df893b          	addw	s2,t6,t4
+    ffff035e:	8676                	mv	a2,t4
+    ffff0360:	2c81                	sext.w	s9,s9
+    ffff0362:	87f6                	mv	a5,t4
+    ffff0364:	e472                	sd	t3,8(sp)
+    ffff0366:	876a                	mv	a4,s10
+    ffff0368:	02061e13          	slli	t3,a2,0x20
+    ffff036c:	020e5e13          	srli	t3,t3,0x20
+    ffff0370:	9e1a                	add	t3,t3,t1
+    ffff0372:	00160e9b          	addiw	t4,a2,1
+    ffff0376:	4281                	li	t0,0
+    ffff0378:	03145063          	bge	s0,a7,ffff0398 <synapse_conv2d+0x164>
+    ffff037c:	000cce63          	bltz	s9,ffff0398 <synapse_conv2d+0x164>
+    ffff0380:	40fb0d3b          	subw	s10,s6,a5
+    ffff0384:	00cd0d3b          	addw	s10,s10,a2
+    ffff0388:	1d02                	slli	s10,s10,0x20
+    ffff038a:	020d5d13          	srli	s10,s10,0x20
+    ffff038e:	9d1e                	add	s10,s10,t2
+    ffff0390:	00175463          	bge	a4,ra,ffff0398 <synapse_conv2d+0x164>
+    ffff0394:	000d0283          	lb	t0,0(s10)
+    ffff0398:	005e0023          	sb	t0,0(t3)
+    ffff039c:	8676                	mv	a2,t4
+    ffff039e:	fdd915e3          	bne	s2,t4,ffff0368 <synapse_conv2d+0x134>
+    ffff03a2:	6e22                	ld	t3,8(sp)
+    ffff03a4:	8eca                	mv	t4,s2
+    ffff03a6:	2e05                	addiw	t3,t3,1
+    ffff03a8:	016f8b3b          	addw	s6,t6,s6
+    ffff03ac:	fb7e11e3          	bne	t3,s7,ffff034e <synapse_conv2d+0x11a>
+    ffff03b0:	862e                	mv	a2,a1
+    ffff03b2:	65c2                	ld	a1,16(sp)
+    ffff03b4:	8d7a                	mv	s10,t5
+    ffff03b6:	8926                	mv	s2,s1
+    ffff03b8:	67e2                	ld	a5,24(sp)
+    ffff03ba:	2c05                	addiw	s8,s8,1
+    ffff03bc:	9dbd                	addw	a1,a1,a5
+    ffff03be:	f78a1ee3          	bne	s4,s8,ffff033a <synapse_conv2d+0x106>
+    ffff03c2:	872a                	mv	a4,a0
+    ffff03c4:	7ce6                	ld	s9,120(sp)
+    ffff03c6:	62e2                	ld	t0,24(sp)
+    ffff03c8:	648a                	ld	s1,128(sp)
+    ffff03ca:	6e4a                	ld	t3,144(sp)
+    ffff03cc:	6b6a                	ld	s6,152(sp)
+    ffff03ce:	652a                	ld	a0,136(sp)
+    ffff03d0:	0014859b          	addiw	a1,s1,1
+    ffff03d4:	01c5053b          	addw	a0,a0,t3
+    ffff03d8:	017b0bbb          	addw	s7,s6,s7
+    ffff03dc:	009c8463          	beq	s9,s1,ffff03e4 <synapse_conv2d+0x1b0>
+    ffff03e0:	84ae                	mv	s1,a1
+    ffff03e2:	b781                	j	ffff0322 <synapse_conv2d+0xee>
+    ffff03e4:	87ea                	mv	a5,s10
+    ffff03e6:	8f36                	mv	t5,a3
+    ffff03e8:	8aba                	mv	s5,a4
+    ffff03ea:	65e6                	ld	a1,88(sp)
+    ffff03ec:	6d46                	ld	s10,80(sp)
+    ffff03ee:	76a6                	ld	a3,104(sp)
+    ffff03f0:	7706                	ld	a4,96(sp)
+    ffff03f2:	5456                	lw	s0,116(sp)
+    ffff03f4:	7482                	ld	s1,32(sp)
+    ffff03f6:	0017051b          	addiw	a0,a4,1
+    ffff03fa:	00fb07bb          	addw	a5,s6,a5
+    ffff03fe:	9ea5                	addw	a3,a3,s1
+    ffff0400:	00ed0463          	beq	s10,a4,ffff0408 <synapse_conv2d+0x1d4>
+    ffff0404:	872a                	mv	a4,a0
+    ffff0406:	bded                	j	ffff0300 <synapse_conv2d+0xcc>
+    ffff0408:	7542                	ld	a0,48(sp)
+    ffff040a:	6586                	ld	a1,64(sp)
+    ffff040c:	64a6                	ld	s1,72(sp)
+    ffff040e:	8856                	mv	a6,s5
+    ffff0410:	7ae2                	ld	s5,56(sp)
+    ffff0412:	86ae                	mv	a3,a1
+    ffff0414:	862a                	mv	a2,a0
+    ffff0416:	88ce                	mv	a7,s3
+    ffff0418:	40000793          	li	a5,1024
+    ffff041c:	8726                	mv	a4,s1
+    ffff041e:	85d6                	mv	a1,s5
+    ffff0420:	00004537          	lui	a0,0x4
+    ffff0424:	40050513          	addi	a0,a0,1024 # 4400 <im2col_buf.2>
+    ffff0428:	da9ff0ef          	jal	ffff01d0 <synapse_matmul>
+    ffff042c:	e521                	bnez	a0,ffff0474 <synapse_conv2d+0x240>
+    ffff042e:	0294043b          	mulw	s0,s0,s1
+    ffff0432:	0004079b          	sext.w	a5,s0
+    ffff0436:	cf99                	beqz	a5,ffff0454 <synapse_conv2d+0x220>
+    ffff0438:	6752                	ld	a4,272(sp)
+    ffff043a:	1402                	slli	s0,s0,0x20
+    ffff043c:	9001                	srli	s0,s0,0x20
+    ffff043e:	40000693          	li	a3,1024
+    ffff0442:	008707b3          	add	a5,a4,s0
+    ffff0446:	4290                	lw	a2,0(a3)
+    ffff0448:	0705                	addi	a4,a4,1
+    ffff044a:	0691                	addi	a3,a3,4
+    ffff044c:	fec70fa3          	sb	a2,-1(a4)
+    ffff0450:	fef71be3          	bne	a4,a5,ffff0446 <synapse_conv2d+0x212>
+    ffff0454:	6412                	ld	s0,256(sp)
+    ffff0456:	79ae                	ld	s3,232(sp)
+    ffff0458:	7a0e                	ld	s4,224(sp)
+    ffff045a:	7daa                	ld	s11,168(sp)
+    ffff045c:	4501                	li	a0,0
+    ffff045e:	60b2                	ld	ra,264(sp)
+    ffff0460:	74ee                	ld	s1,248(sp)
+    ffff0462:	794e                	ld	s2,240(sp)
+    ffff0464:	6aee                	ld	s5,216(sp)
+    ffff0466:	6b4e                	ld	s6,208(sp)
+    ffff0468:	6bae                	ld	s7,200(sp)
+    ffff046a:	6c0e                	ld	s8,192(sp)
+    ffff046c:	7cea                	ld	s9,184(sp)
+    ffff046e:	7d4a                	ld	s10,176(sp)
+    ffff0470:	6151                	addi	sp,sp,272
+    ffff0472:	8082                	ret
+    ffff0474:	6412                	ld	s0,256(sp)
+    ffff0476:	79ae                	ld	s3,232(sp)
+    ffff0478:	7a0e                	ld	s4,224(sp)
+    ffff047a:	7daa                	ld	s11,168(sp)
+    ffff047c:	b7cd                	j	ffff045e <synapse_conv2d+0x22a>
+    ffff047e:	88b2                	mv	a7,a2
+    ffff0480:	86ae                	mv	a3,a1
+    ffff0482:	862a                	mv	a2,a0
+    ffff0484:	40000793          	li	a5,1024
+    ffff0488:	8726                	mv	a4,s1
+    ffff048a:	4581                	li	a1,0
+    ffff048c:	00004537          	lui	a0,0x4
+    ffff0490:	40050513          	addi	a0,a0,1024 # 4400 <im2col_buf.2>
+    ffff0494:	d3dff0ef          	jal	ffff01d0 <synapse_matmul>
+    ffff0498:	d171                	beqz	a0,ffff045c <synapse_conv2d+0x228>
+    ffff049a:	b7d1                	j	ffff045e <synapse_conv2d+0x22a>
+    ffff049c:	557d                	li	a0,-1
+    ffff049e:	b7c1                	j	ffff045e <synapse_conv2d+0x22a>
+
+00000000ffff04a0 <synapse_attention_qk>:
+    ffff04a0:	7179                	addi	sp,sp,-48
+    ffff04a2:	00b66833          	or	a6,a2,a1
+    ffff04a6:	f406                	sd	ra,40(sp)
+    ffff04a8:	f022                	sd	s0,32(sp)
+    ffff04aa:	00787813          	andi	a6,a6,7
+    ffff04ae:	04081d63          	bnez	a6,ffff0508 <synapse_attention_qk+0x68>
+    ffff04b2:	ec26                	sd	s1,24(sp)
+    ffff04b4:	84ae                	mv	s1,a1
+    ffff04b6:	02b605bb          	mulw	a1,a2,a1
+    ffff04ba:	8536                	mv	a0,a3
+    ffff04bc:	e84a                	sd	s2,16(sp)
+    ffff04be:	e44e                	sd	s3,8(sp)
+    ffff04c0:	893e                	mv	s2,a5
+    ffff04c2:	89ba                	mv	s3,a4
+    ffff04c4:	842e                	mv	s0,a1
+    ffff04c6:	bf5ff0ef          	jal	ffff00ba <npu_load_weights>
+    ffff04ca:	e129                	bnez	a0,ffff050c <synapse_attention_qk+0x6c>
+    ffff04cc:	85ca                	mv	a1,s2
+    ffff04ce:	c2fff0ef          	jal	ffff00fc <npu_configure_activation>
+    ffff04d2:	0064551b          	srliw	a0,s0,0x6
+    ffff04d6:	1542                	slli	a0,a0,0x30
+    ffff04d8:	9141                	srli	a0,a0,0x30
+    ffff04da:	c35ff0ef          	jal	ffff010e <npu_run_inference>
+    ffff04de:	00989537          	lui	a0,0x989
+    ffff04e2:	68050513          	addi	a0,a0,1664 # 989680 <_heap_end+0x909880>
+    ffff04e6:	c37ff0ef          	jal	ffff011c <npu_wait_done>
+    ffff04ea:	842a                	mv	s0,a0
+    ffff04ec:	e50d                	bnez	a0,ffff0516 <synapse_attention_qk+0x76>
+    ffff04ee:	029485bb          	mulw	a1,s1,s1
+    ffff04f2:	854e                	mv	a0,s3
+    ffff04f4:	c67ff0ef          	jal	ffff015a <npu_read_output>
+    ffff04f8:	64e2                	ld	s1,24(sp)
+    ffff04fa:	6942                	ld	s2,16(sp)
+    ffff04fc:	69a2                	ld	s3,8(sp)
+    ffff04fe:	70a2                	ld	ra,40(sp)
+    ffff0500:	8522                	mv	a0,s0
+    ffff0502:	7402                	ld	s0,32(sp)
+    ffff0504:	6145                	addi	sp,sp,48
+    ffff0506:	8082                	ret
+    ffff0508:	547d                	li	s0,-1
+    ffff050a:	bfd5                	j	ffff04fe <synapse_attention_qk+0x5e>
+    ffff050c:	64e2                	ld	s1,24(sp)
+    ffff050e:	6942                	ld	s2,16(sp)
+    ffff0510:	69a2                	ld	s3,8(sp)
+    ffff0512:	5479                	li	s0,-2
+    ffff0514:	b7ed                	j	ffff04fe <synapse_attention_qk+0x5e>
+    ffff0516:	64e2                	ld	s1,24(sp)
+    ffff0518:	6942                	ld	s2,16(sp)
+    ffff051a:	69a2                	ld	s3,8(sp)
+    ffff051c:	5475                	li	s0,-3
+    ffff051e:	b7c5                	j	ffff04fe <synapse_attention_qk+0x5e>
+
+00000000ffff0520 <synapse_softmax>:
+    ffff0520:	c265                	beqz	a2,ffff0600 <synapse_softmax+0xe0>
+    ffff0522:	ffe6829b          	addiw	t0,a3,-2
+    ffff0526:	02029793          	slli	a5,t0,0x20
+    ffff052a:	1101                	addi	sp,sp,-32
+    ffff052c:	01e7d293          	srli	t0,a5,0x1e
+    ffff0530:	02069793          	slli	a5,a3,0x20
+    ffff0534:	ec22                	sd	s0,24(sp)
+    ffff0536:	e826                	sd	s1,16(sp)
+    ffff0538:	e44a                	sd	s2,8(sp)
+    ffff053a:	e04e                	sd	s3,0(sp)
+    ffff053c:	01e7d413          	srli	s0,a5,0x1e
+    ffff0540:	8e36                	mv	t3,a3
+    ffff0542:	4f01                	li	t5,0
+    ffff0544:	4f81                	li	t6,0
+    ffff0546:	4385                	li	t2,1
+    ffff0548:	4e85                	li	t4,1
+    ffff054a:	02a1                	addi	t0,t0,8
+    ffff054c:	020f1793          	slli	a5,t5,0x20
+    ffff0550:	01e7d713          	srli	a4,a5,0x1e
+    ffff0554:	972a                	add	a4,a4,a0
+    ffff0556:	00072803          	lw	a6,0(a4)
+    ffff055a:	08d3fa63          	bgeu	t2,a3,ffff05ee <synapse_softmax+0xce>
+    ffff055e:	00470793          	addi	a5,a4,4
+    ffff0562:	005704b3          	add	s1,a4,t0
+    ffff0566:	0007a883          	lw	a7,0(a5)
+    ffff056a:	0791                	addi	a5,a5,4
+    ffff056c:	8346                	mv	t1,a7
+    ffff056e:	0108d363          	bge	a7,a6,ffff0574 <synapse_softmax+0x54>
+    ffff0572:	8342                	mv	t1,a6
+    ffff0574:	0003081b          	sext.w	a6,t1
+    ffff0578:	fe9797e3          	bne	a5,s1,ffff0566 <synapse_softmax+0x46>
+    ffff057c:	00000313          	li	t1,0
+    ffff0580:	008709b3          	add	s3,a4,s0
+    ffff0584:	891a                	mv	s2,t1
+    ffff0586:	4481                	li	s1,0
+    ffff0588:	431c                	lw	a5,0(a4)
+    ffff058a:	4885                	li	a7,1
+    ffff058c:	0711                	addi	a4,a4,4
+    ffff058e:	410787bb          	subw	a5,a5,a6
+    ffff0592:	4037d79b          	sraiw	a5,a5,0x3
+    ffff0596:	0007c463          	bltz	a5,ffff059e <synapse_softmax+0x7e>
+    ffff059a:	00fe98bb          	sllw	a7,t4,a5
+    ffff059e:	01192023          	sw	a7,0(s2)
+    ffff05a2:	009884bb          	addw	s1,a7,s1
+    ffff05a6:	0911                	addi	s2,s2,4
+    ffff05a8:	ff3710e3          	bne	a4,s3,ffff0588 <synapse_softmax+0x68>
+    ffff05ac:	877a                	mv	a4,t5
+    ffff05ae:	00032883          	lw	a7,0(t1)
+    ffff05b2:	02071813          	slli	a6,a4,0x20
+    ffff05b6:	02085813          	srli	a6,a6,0x20
+    ffff05ba:	0088979b          	slliw	a5,a7,0x8
+    ffff05be:	411787bb          	subw	a5,a5,a7
+    ffff05c2:	0297d7bb          	divuw	a5,a5,s1
+    ffff05c6:	982e                	add	a6,a6,a1
+    ffff05c8:	2705                	addiw	a4,a4,1
+    ffff05ca:	0311                	addi	t1,t1,4
+    ffff05cc:	00f80023          	sb	a5,0(a6)
+    ffff05d0:	fdc71fe3          	bne	a4,t3,ffff05ae <synapse_softmax+0x8e>
+    ffff05d4:	2f85                	addiw	t6,t6,1
+    ffff05d6:	01e68f3b          	addw	t5,a3,t5
+    ffff05da:	01c68e3b          	addw	t3,a3,t3
+    ffff05de:	f7f617e3          	bne	a2,t6,ffff054c <synapse_softmax+0x2c>
+    ffff05e2:	6462                	ld	s0,24(sp)
+    ffff05e4:	64c2                	ld	s1,16(sp)
+    ffff05e6:	6922                	ld	s2,8(sp)
+    ffff05e8:	6982                	ld	s3,0(sp)
+    ffff05ea:	6105                	addi	sp,sp,32
+    ffff05ec:	8082                	ret
+    ffff05ee:	f6d9                	bnez	a3,ffff057c <synapse_softmax+0x5c>
+    ffff05f0:	2f85                	addiw	t6,t6,1
+    ffff05f2:	01e68f3b          	addw	t5,a3,t5
+    ffff05f6:	01c68e3b          	addw	t3,a3,t3
+    ffff05fa:	f5f619e3          	bne	a2,t6,ffff054c <synapse_softmax+0x2c>
+    ffff05fe:	b7d5                	j	ffff05e2 <synapse_softmax+0xc2>
+    ffff0600:	8082                	ret
+
+00000000ffff0602 <main>:
+    ffff0602:	1141                	addi	sp,sp,-16
+    ffff0604:	e406                	sd	ra,8(sp)
+    ffff0606:	a83ff0ef          	jal	ffff0088 <npu_reset>
+    ffff060a:	4885                	li	a7,1
+    ffff060c:	4805                	li	a6,1
+    ffff060e:	000057b7          	lui	a5,0x5
+    ffff0612:	40078793          	addi	a5,a5,1024 # 5400 <output>
+    ffff0616:	4721                	li	a4,8
+    ffff0618:	00000697          	auipc	a3,0x0
+    ffff061c:	02868693          	addi	a3,a3,40 # ffff0640 <test_weights>
+    ffff0620:	4621                	li	a2,8
+    ffff0622:	45a1                	li	a1,8
+    ffff0624:	00000517          	auipc	a0,0x0
+    ffff0628:	05c50513          	addi	a0,a0,92 # ffff0680 <test_input>
+    ffff062c:	ba5ff0ef          	jal	ffff01d0 <synapse_matmul>
+    ffff0630:	10500073          	wfi
+    ffff0634:	10500073          	wfi
+    ffff0638:	bfe5                	j	ffff0630 <main+0x2e>
+    ffff063a:	0000                	unimp
+    ffff063c:	0000                	unimp
+	...
+
+00000000ffff0640 <test_weights>:
+    ffff0640:	0001 0000 0000 0000 0100 0000 0000 0000     ................
+    ffff0650:	0000 0001 0000 0000 0000 0100 0000 0000     ................
+    ffff0660:	0000 0000 0001 0000 0000 0000 0100 0000     ................
+    ffff0670:	0000 0000 0000 0001 0000 0000 0000 0100     ................
+
+00000000ffff0680 <test_input>:
+    ffff0680:	0201 0403 0605 0807 0201 0403 0605 0807     ................
+    ffff0690:	0201 0403 0605 0807 0201 0403 0605 0807     ................
+    ffff06a0:	0201 0403 0605 0807 0201 0403 0605 0807     ................
+    ffff06b0:	0201 0403 0605 0807 0201 0403 0605 0807     ................

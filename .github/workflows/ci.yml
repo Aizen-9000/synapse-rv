@@ -1,0 +1,78 @@
+name: Synapse-RV CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  simulate:
+    name: RTL Simulation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Run full regression
+        run: |
+          mkdir -p build
+          chmod +x sim/regression.sh
+          ./sim/regression.sh
+
+      - name: Upload waveforms on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: waveforms
+          path: build/*.vcd
+
+  lint:
+    name: Verilog Lint (Verilator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Verilator
+        run: sudo apt-get update && sudo apt-get install -y verilator
+
+      - name: Lint NPU PE
+        run: |
+          mkdir -p build
+          verilator --lint-only -Wall --top-module npu_pe rtl/npu/npu_pe.v 2>&1 | tee build/lint_npu_pe.log
+          grep -c "Error" build/lint_npu_pe.log && exit 1 || echo "Lint OK"
+
+      - name: Lint UART
+        run: |
+          verilator --lint-only -Wall --top-module uart16550 rtl/periph/uart16550.v 2>&1 | tee build/lint_uart.log
+          grep -c "Error" build/lint_uart.log && exit 1 || echo "Lint OK"
+
+  synthesis:
+    name: Yosys Synthesis Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Yosys
+        run: sudo apt-get update && sudo apt-get install -y yosys
+
+      - name: Synthesize NPU PE
+        run: |
+          chmod +x scripts/yosys_synth.sh
+          ./scripts/yosys_synth.sh npu_pe
+
+      - name: Check no latches inferred
+        run: |
+          if grep -qi "latch" build/syn/npu_pe_synth.log 2>/dev/null; then
+            echo "FAIL - latches found in synthesis. Fix RTL."
+            exit 1
+          fi
+          echo "PASS - no latches"
+
+      - name: Upload synthesis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthesis-reports
+          path: build/syn/

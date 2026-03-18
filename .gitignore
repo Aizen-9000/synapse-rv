@@ -1,0 +1,30 @@
+# OpenLane runs
+openlane/*/runs/
+
+# Build artifacts
+build/sim_*
+build/soc_*
+build/*.vcd
+build/*.hex
+build/*.log
+build/*.json
+build/*.rtlil
+build/syn/
+build/synth*.ys
+build/wrapper*.v
+
+# Large files
+*.gds
+*.mag
+*.spice
+gds_final/
+
+# Embedded git repos
+rtl/cpu/cva6/
+rtl/security/aes/
+rtl/security/sha256/
+rtl/security/sha3/
+
+# Python
+__pycache__/
+*.pyc
