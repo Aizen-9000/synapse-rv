@@ -88,6 +88,7 @@ run_uart() {
     echo ""
     echo "===== UART16550 Standalone Testbench ====="
     iverilog $IVFLAGS \
+        $ROOT/rtl/periph/uart16550.v \
         $ROOT/sim/uart_tb.v \
         -o "$BUILD/sim_uart"
     cd "$BUILD" && vvp sim_uart

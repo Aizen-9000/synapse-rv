@@ -97,7 +97,7 @@ synapse-rv/
 
 ===== NPU PE Testbench =====     6/6  PASS
 ===== NPU System Testbench =====  5/5  PASS
-===== UART Testbench =====        6/7  PASS (test 7 non-blocking timing)
+===== UART Testbench =====        7/7  PASS
 ===== Full SoC Testbench =====    8/8  PASS
 ```
 
