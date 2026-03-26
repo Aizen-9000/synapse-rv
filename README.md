@@ -134,3 +134,29 @@ Contact: maji02479@gmail.com
 
 Built by Anupam — Class 11 student, India. | maji02479@gmail.com  
 Fabless chip design startup.
+
+---
+
+## Third Party IP Attribution
+
+| IP | Source | License |
+|----|--------|---------|
+| CVA6 CPU | ETH Zurich / OpenHW Group | Solderpad 2.0 |
+| AES-256 | secworks | BSD 2-Clause |
+| SHA-256 | secworks | BSD 2-Clause |
+| SHA-3 | secworks | BSD 2-Clause |
+| Caravel wrapper | efabless | Apache 2.0 |
+| Sky130 PDK | Google / SkyWater | Apache 2.0 |
+
+**Original contributions in this repository:**
+- 8×8 systolic array NPU (npu_pe, npu_systolic_array, npu_ctrl, npu_top)
+- AXI4 crossbar interconnect (10-slave)
+- RVV 1.0 vector unit
+- LPDDR4 controller
+- L2 cache
+- DMA engine (4-channel)
+- PCIe Gen2 controller
+- USB 2.0 HS device controller
+- PMU with DVFS
+- Full SoC integration (synapse_rv_soc.v)
+- Complete tape-out flow on Sky130
