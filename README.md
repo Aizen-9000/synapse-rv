@@ -160,3 +160,5 @@ Fabless chip design startup.
 - PMU with DVFS
 - Full SoC integration (synapse_rv_soc.v)
 - Complete tape-out flow on Sky130
+
+⚠️ Note on CI Status: Public automated RTL Simulation and Yosys Synthesis checks are currently showing as failed because the proprietary core RTL files (rtl/npu/ and rtl/vector/) have been removed from the public main branch to protect our Silicon IP. Full simulation logs showing a 100% PASS metric can be reviewed in the VERIFICATION.md datasheet.
