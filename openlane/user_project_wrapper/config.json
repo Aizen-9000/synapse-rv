@@ -1,0 +1,26 @@
+{
+  "DESIGN_NAME": "user_project_wrapper",
+  "VERILOG_FILES": [
+    "/project/build/wrapper_synth.v"
+  ],
+  "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
+  "CLOCK_PORT": "wb_clk_i",
+  "CLOCK_PERIOD": 25.0,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": "0 0 2920 3520",
+  "PL_TARGET_DENSITY": 0.35,
+  "GRT_ALLOW_CONGESTION": 1,
+  "RUN_CVC": 0,
+  "PRIMARY_SIGNOFF_MULTIDIODE_INSERTION_MODE": "none",
+  "SYNTH_READ_BLACKBOX_LIB": 1,
+  "RUN_HEURISTIC_DIODE_INSERTION": 1,
+  "DIODE_ON_PORTS": "in",
+  "GRT_REPAIR_ANTENNAS": 1,
+  "MAX_FANOUT_CONSTRAINT": 10,
+  "BASE_SDC_FILE": "/project/openlane/user_project_wrapper/base.sdc",
+  "QUIT_ON_SYNTH_CHECKS": 0,
+  "SYNTH_SHARE_RESOURCES": 0,
+  "NO_SYNTH_CELL_OPT": 1,
+  "SYNTH_SCRIPT": "/project/openlane/user_project_wrapper/synth_passthrough.tcl",
+  "SYNTH_CHECKS_ALLOW_TRISTATE": 1
+}
